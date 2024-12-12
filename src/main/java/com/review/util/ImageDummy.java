@@ -5,7 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Component
 public class ImageDummy {
-    public String uploadImage(MultipartFile file) {
-        return "/images/"+file.getOriginalFilename();
+    public String upload(MultipartFile file) {
+        return "https://dummy-s3-url.com/"+ file.getOriginalFilename();
     }
 }

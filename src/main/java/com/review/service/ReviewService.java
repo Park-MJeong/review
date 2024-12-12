@@ -7,12 +7,14 @@ import com.review.entity.Product;
 import com.review.entity.Review;
 import com.review.repository.ProductRepository;
 import com.review.repository.ReviewRepository;
+import com.review.util.ImageDummy;
 import com.review.util.ReviewSlice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -21,18 +23,28 @@ import java.util.stream.Collectors;
 
 @Service
 public class ReviewService {
-    @Autowired
-    private ReviewRepository reviewRepository;
-    @Autowired
-    private ProductRepository productRepository;
 
-//    리뷰 작성
+    private final ReviewRepository reviewRepository;
+    private final ProductRepository productRepository;
+    private final ImageDummy imageDummy;
+
+    public ReviewService(ReviewRepository reviewRepository, ProductRepository productRepository, ImageDummy imageDummy) {
+        this.reviewRepository = reviewRepository;
+        this.productRepository = productRepository;
+        this.imageDummy = imageDummy;
+    }
+
+    //    리뷰 작성
     @Transactional
-    public ReviewResponseDto createReview(Long productId,ReviewRequestDto reviewRequestDto) {
+    public ReviewResponseDto createReview(Long productId, ReviewRequestDto reviewRequestDto, MultipartFile image) {
         Product product = findProduct(productId);
+
+        String imageUrl=null;
+        if(image!=null && !image.isEmpty()) imageUrl=imageDummy.upload(image);
 
         if(!reviewRepository.existsByProductIdAndUserId(productId,reviewRequestDto.getUserId())){
                 Review review = new Review(reviewRequestDto);
+                review.setImageUrl(imageUrl);
                 Review saveReview =  reviewRepository.save(review);
                 saveReview.setProduct(product);
                 ReviewResponseDto reviewResponseDto = new ReviewResponseDto(saveReview);
@@ -59,9 +71,9 @@ public class ReviewService {
         Slice<Review> reviews;
         int limitSize = ReviewSlice.sliceLimit(size);
         if(cursor==null){
-            reviews =reviewRepository.findByProductIdOrderByIdDesc(productId, Pageable.ofSize(limitSize));
+            reviews =reviewRepository.findByProductIdOrderByCreatedAtDesc(productId, Pageable.ofSize(limitSize));
         }else {
-            reviews = reviewRepository.findByProductIdLessThanOrderByIdDesc(productId,cursor,Pageable.ofSize(limitSize));
+            reviews = reviewRepository.findByProductIdLessThanOrderByCreatedAtDesc(productId,cursor,Pageable.ofSize(limitSize));
         }
         List<ReviewResponseDto> reviewList =reviews.getContent()
                                                     .stream()
