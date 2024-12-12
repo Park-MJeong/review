@@ -33,7 +33,7 @@ public class Review{
     private LocalDateTime createdAt;
 
     @ManyToOne
-    @JoinColumn(name="product_Id")
+    @JoinColumn(name="product_id")
     private Product product;
 
     public Review(ReviewRequestDto requestDto){
