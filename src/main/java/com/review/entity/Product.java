@@ -22,7 +22,7 @@ public class Product {
     private Float score;
 
 //    제품한개가  여러개의 리뷰를 가짐
-    @OneToMany(mappedBy = "product" )
+    @OneToMany(mappedBy = "product")
     private List<Review> reviews = new ArrayList<>();
 
 }
