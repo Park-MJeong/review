@@ -25,4 +25,9 @@ public class Product {
     @OneToMany(mappedBy = "product")
     private List<Review> reviews = new ArrayList<>();
 
+//    테스트:상품 생성자
+    public Product(Long id, Long reviewCount, float score) {
+        this.reviewCount = reviewCount;
+        this.score=score;
+    }
 }
